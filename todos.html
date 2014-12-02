@@ -1,13 +1,15 @@
 <head>
-  <title>mot的todo list</title>
+  <title>mot的notebook</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 </head>
 
 <body>
+
+    <img style="display: none;" src="logo.jpg" />
     <header>
-        <h1>To do list</h1>
+        <h1>Mot的Notebook</h1>
         <form class="new-task">
-            <input type="text" name="text" placeholder="Type some contents" />
+            <input type="text" name="text" />
         </form>
     </header>
 
@@ -20,5 +22,5 @@
 
 
 <template name="task">
-    <li>{{text}}</li>
+    <li><strong>{{formatDate createdAt "simple"}}</strong> : {{text}}</li>
 </template>
