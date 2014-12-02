@@ -28,17 +28,24 @@ if (Meteor.isClient) {
             var text = event.target.text.value;
             Tasks.insert({
                 text: text ,
+                owner: Meteor.userId() ,
+                username: Meteor.user().username ,
                 createdAt: new Date()
             });
-            console.log(event);
             event.target.text.value= "";
             return false;
         }
+    });
+
+    console.log(Meteor.user());
+
+    Accounts.ui.config({
+        passwordSignupFields: "USERNAME_ONLY"
     });
 }
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-    // code to run on server at startup
+
   });
 }

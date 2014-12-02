@@ -62,9 +62,11 @@ form {
     font-size: 1em;
 }
 
-.new-task input:focus{
+.new-task input{
     outline: 0;
     color: #fff;
+    border: 1px solid #fff;
+    margin-bottom: 20px;
 }
 
 ul {
