@@ -1,0 +1,24 @@
+<head>
+  <title>mot的todo list</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+</head>
+
+<body>
+    <header>
+        <h1>To do list</h1>
+        <form class="new-task">
+            <input type="text" name="text" placeholder="Type some contents" />
+        </form>
+    </header>
+
+    <ul>
+        {{#each tasks}}
+            {{>task}}
+        {{/each}}
+    </ul>
+</body>
+
+
+<template name="task">
+    <li>{{text}}</li>
+</template>
