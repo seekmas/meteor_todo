@@ -37,8 +37,6 @@ if (Meteor.isClient) {
         }
     });
 
-    console.log(Meteor.user());
-
     Accounts.ui.config({
         passwordSignupFields: "USERNAME_ONLY"
     });
@@ -46,6 +44,6 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-
+      
   });
 }

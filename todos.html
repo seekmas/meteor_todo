@@ -1,6 +1,129 @@
 <head>
-  <title>微信朋友圈群聊</title>
+  <title>Meeting Online</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+  <script src="pin/jquery.stickyscroll.js"></script>
+  <script src="webrtc/socket.io.js"></script>
+  <script src="webrtc/simplewebrtc.bundle.js"></script>
+  <script>
+  $(function() {
+      $('.sidebar').stickyScroll({ container: '.box' });
+  });
+  </script>
+  <script>
+
+  //var room = location.search && location.search.split('?')[1];
+  var room = 'mot';
+  // create our webrtc connection
+  var webrtc = new SimpleWebRTC({
+      url: 'http://220.248.81.78:8000/' , 
+      // the id/element dom element that will hold "our" video
+      localVideoEl: 'localVideo',
+      // the id/element dom element that will hold remote videos
+      remoteVideosEl: '',
+      // immediately ask for camera access
+      autoRequestMedia: true,
+      debug: false,
+      detectSpeakingEvents: true,
+      autoAdjustMic: false
+  });
+
+  // when it's ready, join if we got a room from the URL
+  webrtc.on('readyToCall', function () {
+      // you can name it anything
+      if (room) webrtc.joinRoom(room);
+  });
+
+  function showVolume(el, volume) {
+      if (!el) return;
+      if (volume < -45) { // vary between -45 and -20
+          el.style.height = '0px';
+      } else if (volume > -20) {
+          el.style.height = '100%';
+      } else {
+          el.style.height = '' + Math.floor((volume + 100) * 100 / 25 - 220) + '%';
+      }
+  }
+  webrtc.on('channelMessage', function (peer, label, data) {
+      if (data.type == 'volume') {
+          showVolume(document.getElementById('volume_' + peer.id), data.volume);
+      }
+  });
+  webrtc.on('videoAdded', function (video, peer) {
+      console.log('video added', peer);
+      var remotes = document.getElementById('remotes');
+      if (remotes) {
+          var d = document.createElement('div');
+          d.className = 'videoContainer';
+          d.id = 'container_' + webrtc.getDomId(peer);
+          d.appendChild(video);
+          var vol = document.createElement('div');
+          vol.id = 'volume_' + peer.id;
+          vol.className = 'volume_bar';
+          video.onclick = function () {
+              video.style.width = video.videoWidth + 'px';
+              video.style.height = video.videoHeight + 'px';
+          };
+          d.appendChild(vol);
+          remotes.appendChild(d);
+      }
+  });
+  webrtc.on('videoRemoved', function (video, peer) {
+      console.log('video removed ', peer);
+      var remotes = document.getElementById('remotes');
+      var el = document.getElementById('container_' + webrtc.getDomId(peer));
+      if (remotes && el) {
+          remotes.removeChild(el);
+      }
+  });
+
+  // Since we use this twice we put it here
+  function setRoom(name) {
+      $('form').remove();
+      $('h1').text(name);
+      $('#subTitle').text('Link to join: ' + location.href);
+      $('body').addClass('active');
+  }
+
+  if (room) {
+      setRoom(room);
+  } else {
+      $('form').submit(function () {
+          var val = $('#sessionInput').val().toLowerCase().replace(/\s/g, '-').replace(/[^A-Za-z0-9_\-]/g, '');
+          webrtc.createRoom(val, function (err, name) {
+              console.log(' create room cb', arguments);
+
+              var newUrl = location.pathname + '?' + name;
+              if (!err) {
+                  history.replaceState({foo: 'bar'}, null, newUrl);
+                  setRoom(name);
+              } else {
+                  console.log(err);
+              }
+          });
+          return false;
+      });
+  }
+
+  var button = $('#screenShareButton');
+
+  button.click(function () {
+      if (webrtc.getLocalScreen()) {
+          webrtc.stopScreenShare();
+          setButton(true);
+      } else {
+          webrtc.shareScreen(function (err) {
+              if (err) {
+                  setButton(true);
+              } else {
+                  setButton(false);
+              }
+          });
+
+      }
+  });
+</script>
+
 </head>
 
 <body>
@@ -8,25 +131,35 @@
     <img style="display: none;" src="logo.jpg" />
 
     <header>
-        <h1>微信朋友圈群聊</h1>
+        <h1>Meeting Online</h1>
+        {{> loginButtons}}
+    </header>
+
+<div class="box">
+    <div class="left">
+        <h3 class="sub-title">Chatting by video</h3>
+        <video class="video" id="localVideo"></video>
+        <div id="remotesVideos"></div>
+    </div>
+
+    <div class="right sidebar">
+        <h3 class="sub-title">Chatting by typing</h3>
         {{#if currentUser}}
         <form class="new-task">
             <input type="text" name="text" />
         </form>
         {{/if}}
-        {{> loginButtons}}
 
-    </header>
-
-    <ul>
-        {{#each tasks}}
-            {{>task}}
-        {{/each}}
-    </ul>
-
+        <ul>
+            {{#each tasks}}
+                {{>task}}
+            {{/each}}
+        </ul>
+    </div>
+</div>
 </body>
 
 
 <template name="task">
-    <li><strong>{{formatDate createdAt "simple"}} {{username}}</strong> : {{text}}</li>
+    <li><small>{{formatDate createdAt "simple"}}</small> <strong>{{username}}</strong> : {{text}}</li>
 </template>

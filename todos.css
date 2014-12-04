@@ -116,6 +116,27 @@ header .hide-completed {
     margin-left: 5px;
 }
 
+.left {
+    float: left;
+    width: 40%;
+}
+
+.right {
+    float: left;
+    width: 59%;
+    padding-right: 10px;
+
+}
+
+.video {
+    width: 90%;
+    padding: 10px;
+}
+
+.sub-title {
+    color: #fff;
+}
+
 @media (max-width: 600px) {
     li {
         padding: 12px 15px;
@@ -128,5 +149,15 @@ header .hide-completed {
 
     .new-task input {
         padding-bottom: 5px;
+    }
+
+    .left {
+        float: left;
+        width: 100%%;
+    }
+
+    .right {
+        float: left;
+        width: 100%;
     }
 }
